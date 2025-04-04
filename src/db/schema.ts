@@ -32,32 +32,35 @@ const mutatePeopleSchema = v.pipe(
 	v.array(v.string()),
 	v.transform((input) => input.join(PEOPLE_DELIM)),
 );
+const mutateRsvpSchema = v.pipe(
+	v.optional(v.boolean()),
+	v.transform((input) => {
+		if (input === undefined) return null;
+		return input ? 1 : 0;
+	}),
+);
 
 export const CreateInvitationSchema = createInsertSchema(Invitation, {
 	people: mutatePeopleSchema,
-	rsvp: v.pipe(
-		v.optional(v.boolean()),
-		v.transform((input) => {
-			if (input === undefined) return null;
-			return input ? 1 : 0;
-		}),
-	),
+	rsvp: mutateRsvpSchema,
 });
 
 export const UpdateInvitationSchema = createUpdateSchema(Invitation, {
 	people: v.optional(mutatePeopleSchema),
-	rsvp: v.pipe(
-		v.optional(v.boolean()),
-		v.transform((input) => {
-			if (input === undefined) return null;
-			return input ? 1 : 0;
-		}),
-	),
+	rsvp: mutateRsvpSchema,
 });
 
 export const InvitationSelectSchema = createSelectSchema(Invitation, {
 	people: v.pipe(
 		v.string(),
 		v.transform((input) => input.split("|")),
+	),
+	rsvp: v.pipe(
+		v.nullable(v.number()),
+		v.transform((input) => {
+			if (input === null) return null;
+
+			return Boolean(input);
+		}),
 	),
 });
