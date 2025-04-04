@@ -3,32 +3,34 @@
 import {
 	ServerValidateError,
 	createServerValidate,
-	formOptions,
 } from "@tanstack/react-form/nextjs";
+import { revalidatePath } from "next/cache";
 import * as v from "valibot";
+import { selectPeopleSchema } from "~/db/schema";
+import { createInvitation, deleteInvitation } from "~/utils/api";
 import { formOpts } from "./create-invitation";
 
 const serverValidate = createServerValidate({
 	...formOpts,
-	onServerValidate: ({ value }) => {
-		// __AUTO_GENERATED_PRINT_VAR_START__
-		console.log(" value: %s", value); // __AUTO_GENERATED_PRINT_VAR_END__
-		if (!value.people) return "Server validation: guests are required";
-	},
+	onServerValidate: () => {},
 });
 
 export const createInvitationAction = async (
-	prev: unknown,
+	_: unknown,
 	formData: FormData,
 ) => {
 	try {
 		const validatedData = await serverValidate(formData);
-		console.log("validatedData", validatedData);
-		// Persist the form data to the database
-		// await sql`
-		//   INSERT INTO users (name, email, password)
-		//   VALUES (${validatedData.name}, ${validatedData.email}, ${validatedData.password})
-		// `
+		const transformDataSchema = v.object({
+			label: v.string(),
+			guests: selectPeopleSchema,
+		});
+		const parsedData = v.parse(transformDataSchema, validatedData);
+		createInvitation({
+			label: parsedData.label,
+			people: parsedData.guests,
+		});
+		revalidatePath("/");
 	} catch (e) {
 		if (e instanceof ServerValidateError) {
 			return e.formState;
@@ -36,4 +38,9 @@ export const createInvitationAction = async (
 
 		throw e;
 	}
+};
+
+export const deleteInvitationAction = async (id: number) => {
+	deleteInvitation(id);
+	revalidatePath("/");
 };

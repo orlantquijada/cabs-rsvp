@@ -54,5 +54,7 @@ const rsvpAction = async (id: number, code: string, rsvp: boolean) => {
 	"use server";
 
 	patchInvitation(id, { rsvp });
-	revalidateTag(initationKeys.code(code));
+	// revalidateTag(initationKeys.code(code));
 };
+
+export const dynamic = "force-dynamic";

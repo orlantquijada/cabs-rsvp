@@ -1,7 +1,6 @@
 import AddInvitationForm from "~/components/AddInvitationForm";
-import { ClientComp } from "~/components/ClientForm";
 import InvitationsDataTable from "~/components/InvitationsDataTable";
-import { createInvitation, getInvitations } from "~/utils/api";
+import { getInvitations } from "~/utils/api";
 
 export default async function Home() {
 	const invitations = await getInvitations();
@@ -29,3 +28,5 @@ export default async function Home() {
 		</div>
 	);
 }
+
+export const dynamic = "force-dynamic";

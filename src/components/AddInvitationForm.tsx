@@ -9,6 +9,7 @@ import {
 import { formOptions, initialFormState } from "@tanstack/react-form/nextjs";
 import { X } from "lucide-react";
 
+import { useRouter } from "next/navigation";
 import { useActionState, useState, useTransition } from "react";
 import * as v from "valibot";
 import type { CreateInvitationSchema } from "~/db/schema";
@@ -36,6 +37,7 @@ export default function AddInvitationForm() {
 		initialFormState,
 	);
 	const [name, setName] = useState("");
+	const router = useRouter();
 
 	const form = useAppForm({
 		...formOpts,
@@ -43,6 +45,7 @@ export default function AddInvitationForm() {
 		onSubmit: ({ formApi }) => {
 			formApi.reset();
 			setName("");
+			router.refresh();
 		},
 	});
 
@@ -51,6 +54,35 @@ export default function AddInvitationForm() {
 			<h2 className="text-xl font-semibold tracking-tight transition-colors mb-4">
 				Create Invitation
 			</h2>
+
+			<form.AppField name="label">
+				{(field) => (
+					<div className="mb-4">
+						<label
+							htmlFor="name"
+							className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+						>
+							Label
+						</label>
+						<field.Input
+							id="label"
+							className="md:w-1/2 mt-2"
+							placeholder="Quijada Family"
+							name={field.name}
+							value={field.state.value}
+							onChange={(e) => {
+								field.handleChange(e.target.value);
+							}}
+						/>
+						{field.state.meta.errors.length > 0 ? (
+							<small className="text-sm font-medium leading-none text-destructive block mt-2">
+								{field.state.meta.errors.map((err) => err?.message).join(", ")}
+							</small>
+						) : null}
+					</div>
+				)}
+			</form.AppField>
+
 			<form.AppField name="people" mode="array">
 				{(field) => (
 					<div>
@@ -79,6 +111,11 @@ export default function AddInvitationForm() {
 								}
 							}}
 						/>
+						{field.state.meta.errors.length > 0 ? (
+							<small className="text-sm font-medium leading-none text-destructive block mt-2">
+								{field.state.meta.errors.map((err) => err?.message).join(", ")}
+							</small>
+						) : null}
 						<div className="flex-wrap flex mt-2 gap-2">
 							{field.state.value.map(({ name }, index) => (
 								<Badge key={name} variant="default">
@@ -98,16 +135,6 @@ export default function AddInvitationForm() {
 					</div>
 				)}
 			</form.AppField>
-
-			<form.Subscribe selector={(s) => [s.isValid]}>
-				{([isValid]) =>
-					isValid ? null : (
-						<small className="text-sm font-medium leading-none text-destructive block">
-							Guest is required.
-						</small>
-					)
-				}
-			</form.Subscribe>
 
 			<form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting]}>
 				{([canSubmit, isSubmitting]) => (

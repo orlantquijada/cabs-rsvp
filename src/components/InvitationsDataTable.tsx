@@ -9,7 +9,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { Delete, MoreVerticalIcon, Trash } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -19,6 +19,8 @@ import {
 	TableRow,
 } from "~/components/ui/table";
 import Copy from "~/icons/copy";
+import { deleteInvitationAction } from "~/lib/actions";
+import InvitationRowActions from "./InvitationRowActions";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -54,117 +56,79 @@ type Guest = {
 	rsvp: boolean | null;
 	code: string;
 	guest: string;
+	label: string;
 };
 
 type Props = {
 	guests: Guest[];
 };
 
-export const columns: ColumnDef<Guest>[] = [
-	{
-		accessorKey: "guest",
-		header: "Guest",
-	},
-	{
-		accessorKey: "rsvp",
-		header: "RSVP",
-		accessorFn: ({ rsvp }) => (rsvp === null ? "-" : rsvp ? "yes" : "no"),
-		cell: ({ getValue }) => {
-			const value = getValue();
+export default function InvitationsDataTable({ guests }: Props) {
+	const [globalFilter, setGlobalFilter] = useState("");
 
-			return (
-				<code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] text-xs font-semibold">
-					{value === "-" ? "–" : (value as string)}
-				</code>
-			);
-		},
-	},
-	{
-		accessorKey: "code",
-		header: "Code",
-		cell: ({ row }) => {
-			const guest = row.original;
-			return (
-				<span className="inline-flex items-center justify-center gap-1.5">
-					<code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] text-xs font-semibold">
-						{row.original.code}
-					</code>
+	const columns: ColumnDef<Guest>[] = useMemo(
+		() => [
+			{
+				accessorKey: "guest",
+				header: "Guest",
+			},
+			{
+				accessorKey: "label",
+				header: "Label",
+			},
+			{
+				accessorKey: "rsvp",
+				header: "RSVP",
+				accessorFn: ({ rsvp }) => (rsvp === null ? "-" : rsvp ? "yes" : "no"),
+				cell: ({ getValue }) => {
+					const value = getValue();
 
-					<Button
-						size="icon"
-						variant="ghost"
-						className="transition-all active:scale-95"
-						onClick={() => {
-							const url = `${window.location.origin}/${guest.code}`;
-							if (window.isSecureContext && navigator.clipboard)
-								navigator.clipboard.writeText(url);
-						}}
-					>
-						<Copy size={16} />
-					</Button>
-				</span>
-			);
-		},
-	},
-	{
-		id: "actions",
-		cell: ({ row }) => {
-			const guest = row.original;
+					return (
+						<code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] text-xs font-semibold">
+							{value === "-" ? "–" : (value as string)}
+						</code>
+					);
+				},
+			},
+			{
+				accessorKey: "code",
+				header: "Code",
+				cell: ({ row }) => {
+					const guest = row.original;
+					return (
+						<span className="inline-flex items-center justify-center gap-1.5">
+							<code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] text-xs font-semibold">
+								{row.original.code}
+							</code>
 
-			return (
-				<Dialog>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
 							<Button
-								variant="ghost"
-								className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
 								size="icon"
-							>
-								<MoreVerticalIcon size={16} />
-								<span className="sr-only">Open menu</span>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem
+								variant="ghost"
+								className="transition-all active:scale-95"
 								onClick={() => {
 									const url = `${window.location.origin}/${guest.code}`;
 									if (window.isSecureContext && navigator.clipboard)
 										navigator.clipboard.writeText(url);
 								}}
 							>
-								Copy invite link
-							</DropdownMenuItem>
-							<DialogTrigger asChild>
-								<DropdownMenuItem onClick={() => {}}>
-									Open invitation details
-								</DropdownMenuItem>
-							</DialogTrigger>
-						</DropdownMenuContent>
-					</DropdownMenu>
+								<Copy size={16} />
+							</Button>
+						</span>
+					);
+				},
+			},
+			{
+				id: "actions",
+				cell: ({ row }) => {
+					const guest = row.original;
 
-					<DialogContent className="sm:max-w-[425px]">
-						<DialogHeader>
-							<small className="text-muted-foreground text-sm font-medium leading-none">
-								Invitation Details
-							</small>
-							<DialogTitle>
-								<code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
-									{guest.code}
-								</code>
-							</DialogTitle>
-						</DialogHeader>
-						<DialogFooter>
-							<Button type="submit">Save changes</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
-			);
-		},
-	},
-];
+					return <InvitationRowActions guest={guest} />;
+				},
+			},
+		],
+		[],
+	);
 
-export default function InvitationsDataTable({ guests }: Props) {
-	const [globalFilter, setGlobalFilter] = useState("");
 	const table = useReactTable({
 		data: guests,
 		columns,

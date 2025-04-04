@@ -15,6 +15,10 @@ export const createInvitation = async (
 	return db.insert(Invitation).values(parse(CreateInvitationSchema, values));
 };
 
+export const deleteInvitation = async (id: number) => {
+	return db.delete(Invitation).where(eq(Invitation.id, id));
+};
+
 export const patchInvitation = async (
 	id: number,
 	values: InferInput<typeof UpdateInvitationSchema>,
@@ -32,28 +36,17 @@ export const initationKeys = {
 
 export const getInvitations = async () => {
 	const invitationsSchema = array(InvitationSelectSchema);
-	const invitationsQuery = unstable_cache(
-		async () => await db.query.Invitation.findMany(),
-		[initationKeys.all()],
-		{ revalidate: 10, tags: [initationKeys.all()] },
-	);
+	const invitationsQuery = await db.query.Invitation.findMany();
 
-	const parsedinvitations = parse(invitationsSchema, await invitationsQuery());
+	const parsedinvitations = parse(invitationsSchema, invitationsQuery);
 
 	return parsedinvitations;
 };
 
 export const getInvitation = async (code: string) => {
-	const invitationQuery = unstable_cache(
-		async () =>
-			await db.query.Invitation.findFirst({ where: eq(Invitation.code, code) }),
-		[initationKeys.code(code)],
-		{
-			revalidate: 10,
-			tags: [initationKeys.code(code)],
-		},
-	);
-
-	const invitation = parse(InvitationSelectSchema, await invitationQuery());
+	const invitationQuery = await db.query.Invitation.findFirst({
+		where: eq(Invitation.code, code),
+	});
+	const invitation = parse(InvitationSelectSchema, invitationQuery);
 	return invitation;
 };

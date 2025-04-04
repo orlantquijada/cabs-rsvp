@@ -19,6 +19,7 @@ function generateRandomCode(length = 5): string {
 export const Invitation = sqliteTable("invitations", {
 	id: integer().primaryKey({ autoIncrement: true }).notNull(),
 	people: text().notNull(),
+	label: text().notNull(),
 	rsvp: integer({ mode: "number" }),
 	code: text("code", { length: 5 })
 		.notNull()
@@ -28,7 +29,7 @@ export const Invitation = sqliteTable("invitations", {
 
 const PEOPLE_DELIM = "|";
 
-const mutatePeopleSchema = v.pipe(
+export const mutatePeopleSchema = v.pipe(
 	v.array(v.string()),
 	v.transform((input) => input.join(PEOPLE_DELIM)),
 );
@@ -49,6 +50,11 @@ export const UpdateInvitationSchema = createUpdateSchema(Invitation, {
 	people: v.optional(mutatePeopleSchema),
 	rsvp: mutateRsvpSchema,
 });
+
+export const selectPeopleSchema = v.pipe(
+	v.string(),
+	v.transform((input) => input.split("|")),
+);
 
 export const InvitationSelectSchema = createSelectSchema(Invitation, {
 	people: v.pipe(

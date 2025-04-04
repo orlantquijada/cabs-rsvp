@@ -2,6 +2,7 @@
 
 import type * as v from "valibot";
 
+import { useRouter } from "next/navigation";
 import type { InvitationSelectSchema } from "~/db/schema";
 import { Button } from "./Button";
 
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default function MissingRSVP({ invitation, rsvpAction }: Props) {
+	const router = useRouter();
 	return (
 		<div className="flex flex-col">
 			<h1 className="text-3xl font-semibold tracking-tight transition-colors mb-4">
@@ -34,6 +36,7 @@ export default function MissingRSVP({ invitation, rsvpAction }: Props) {
 						variant="secondary"
 						onClick={() => {
 							rsvpAction(invitation.id, invitation.code, false);
+							router.refresh();
 						}}
 					>
 						No, I cannot attend
@@ -42,6 +45,7 @@ export default function MissingRSVP({ invitation, rsvpAction }: Props) {
 						type="button"
 						onClick={() => {
 							rsvpAction(invitation.id, invitation.code, true);
+							router.refresh();
 						}}
 					>
 						Yes, I want to attend
