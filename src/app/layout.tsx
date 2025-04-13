@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Domine, Inconsolata, Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
 	variable: "--font-inter",
+	subsets: ["latin"],
+});
+
+const domine = Domine({
+	variable: "--font-domine",
+	subsets: ["latin"],
+});
+
+const inconsolata = Inconsolata({
+	variable: "--font-inconsolata",
 	subsets: ["latin"],
 });
 
@@ -20,7 +30,11 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${inter.variable} antialiased`}>{children}</body>
+			<body
+				className={`${inter.variable} ${domine.variable} ${inconsolata.variable} antialiased`}
+			>
+				{children}
+			</body>
 		</html>
 	);
 }

@@ -2,9 +2,13 @@
 
 import type * as v from "valibot";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { InvitationSelectSchema } from "~/db/schema";
-import { Button } from "./Button";
+
+import arc from "../assets/images/arc view.png";
+import hero from "../assets/images/hero.png";
+import heroText from "../assets/images/hero text.png";
 
 type Props = {
 	invitation: v.InferOutput<typeof InvitationSelectSchema>;
@@ -14,43 +18,49 @@ type Props = {
 export default function MissingRSVP({ invitation, rsvpAction }: Props) {
 	const router = useRouter();
 	return (
-		<div className="flex flex-col">
-			<h1 className="text-3xl font-semibold tracking-tight transition-colors mb-4">
-				Invited People
-			</h1>
-			<ul className="ml-6 list-disc [&>li]:mt-2">
-				{invitation.people.map((person) => (
-					<li key={person}>{person}</li>
-				))}
-			</ul>
+		<div>
+			<div className="h-screen w-full flex items-center justify-center flex-col px-6 gap-8">
+				<Image src={hero} alt="hero" />
+				<Image src={heroText} alt="hero text" />
 
-			<div>
-				<p className="leading-7 mt-6 text-pretty">
-					Please let us know if you'll be able to celebrate with us by{" "}
-					<span className="font-semibold">Jan 25, 2025</span>
-				</p>
+				<p className="text-brand">Hello, {invitation.label} you are invited!</p>
 
-				<div className="grid grid-cols-2 gap-2 mt-4">
-					<Button
+				{invitation.people.length > 1 && (
+					<ul className="flex flex-col items-center text-brand">
+						{invitation.people.map((person) => (
+							<li key={person}>{person}</li>
+						))}
+					</ul>
+				)}
+
+				<div className="grid grid-cols-2 gap-2">
+					<button
+						className="h-10 px-4 bg-brand text-on-brand text-base font-sans border border-transparent grid place-items-center"
 						type="button"
-						variant="secondary"
-						onClick={() => {
-							rsvpAction(invitation.id, invitation.code, false);
-							router.refresh();
-						}}
-					>
-						No, I cannot attend
-					</Button>
-					<Button
-						type="button"
+						style={{ borderRadius: 8 }}
 						onClick={() => {
 							rsvpAction(invitation.id, invitation.code, true);
 							router.refresh();
 						}}
 					>
-						Yes, I want to attend
-					</Button>
+						I am going
+					</button>
+					<button
+						className="h-10 px-4 bg-transparent text-brand text-base font-sans border border-brand grid place-items-center"
+						style={{ borderRadius: 8 }}
+						type="button"
+						onClick={() => {
+							rsvpAction(invitation.id, invitation.code, false);
+							router.refresh();
+						}}
+					>
+						Not going
+					</button>
 				</div>
+			</div>
+
+			<div className="m-4 md:m-8 grid place-items-center">
+				<Image src={arc} alt="hero" />
 			</div>
 		</div>
 	);
