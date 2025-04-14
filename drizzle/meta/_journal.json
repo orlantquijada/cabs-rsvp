@@ -43,6 +43,13 @@
       "when": 1743756062943,
       "tag": "0005_cultured_morg",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1744655109463,
+      "tag": "0006_sloppy_iron_lad",
+      "breakpoints": true
     }
   ]
 }

@@ -6,13 +6,11 @@ import {
 	mergeForm,
 	useTransform,
 } from "@tanstack/react-form";
-import { formOptions, initialFormState } from "@tanstack/react-form/nextjs";
+import { initialFormState } from "@tanstack/react-form/nextjs";
 import { X } from "lucide-react";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useState, useTransition } from "react";
-import * as v from "valibot";
-import type { CreateInvitationSchema } from "~/db/schema";
+import { useActionState, useState } from "react";
 import { createInvitationAction } from "~/lib/actions";
 import { formOpts } from "~/lib/create-invitation";
 import { Badge } from "./ui/badge";
@@ -41,6 +39,7 @@ export default function AddInvitationForm() {
 
 	const form = useAppForm({
 		...formOpts,
+		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		transform: useTransform((baseForm) => mergeForm(baseForm, state!), [state]),
 		onSubmit: ({ formApi }) => {
 			formApi.reset();
@@ -67,7 +66,7 @@ export default function AddInvitationForm() {
 						<field.Input
 							id="label"
 							className="md:w-1/2 mt-2"
-							placeholder="Quijada Family"
+							placeholder="Cabaluna Family"
 							name={field.name}
 							value={field.state.value}
 							onChange={(e) => {
@@ -89,7 +88,7 @@ export default function AddInvitationForm() {
 						<input
 							name="guests"
 							type="hidden"
-							value={field.state.value.map(({ name }) => name).join("|")}
+							value={field.state.value.map(({ name }) => name)}
 						/>
 						<label
 							htmlFor="name"

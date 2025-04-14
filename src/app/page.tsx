@@ -1,16 +1,9 @@
 import AddInvitationForm from "~/components/AddInvitationForm";
 import InvitationsDataTable from "~/components/InvitationsDataTable";
-import { getInvitations } from "~/utils/api";
+import { getInvitedPeople } from "~/utils/api";
 
 export default async function Home() {
-	const invitations = await getInvitations();
-
-	const guests = invitations.flatMap((invitation) =>
-		invitation.people.map((person) => ({
-			guest: person,
-			...invitation,
-		})),
-	);
+	const guests = await getInvitedPeople();
 
 	return (
 		<div className="h-full grid md:grid-cols-12 gap-10 py-10">
@@ -19,10 +12,15 @@ export default async function Home() {
 					Guests
 				</h1>
 
-				<InvitationsDataTable guests={guests} />
+				<InvitationsDataTable
+					guests={guests.map((guest) => ({
+						...guest,
+						invitationLabel: guest.invitation.label,
+					}))}
+				/>
 			</div>
 
-			<div className="md:col-span-5 bg-sidebar border border-sidebar-border py-8 px-5 md:px-8  md:rounded-l-4xl">
+			<div className="md:col-span-5 bg-sidebar border border-sidebar-border py-8 px-5 md:px-8 md:rounded-l-4xl">
 				<AddInvitationForm />
 			</div>
 		</div>

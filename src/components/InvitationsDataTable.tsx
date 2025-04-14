@@ -8,8 +8,7 @@ import {
 	getPaginationRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { Delete, MoreVerticalIcon, Trash } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
 	Table,
 	TableBody,
@@ -19,44 +18,17 @@ import {
 	TableRow,
 } from "~/components/ui/table";
 import Copy from "~/icons/copy";
-import { deleteInvitationAction } from "~/lib/actions";
+import { exportCsvAction } from "~/lib/actions";
 import InvitationRowActions from "./InvitationRowActions";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "./ui/alert-dialog";
 import { Button } from "./ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "./ui/dialog";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 import { Input } from "./ui/input";
 
 type Guest = {
-	id: number;
-	people: string[];
 	rsvp: boolean | null;
 	code: string;
-	guest: string;
-	label: string;
+	name: string;
+	invitationId: number;
+	invitationLabel: string;
 };
 
 type Props = {
@@ -69,11 +41,11 @@ export default function InvitationsDataTable({ guests }: Props) {
 	const columns: ColumnDef<Guest>[] = useMemo(
 		() => [
 			{
-				accessorKey: "guest",
+				accessorKey: "name",
 				header: "Guest",
 			},
 			{
-				accessorKey: "label",
+				accessorKey: "invitationLabel",
 				header: "Label",
 			},
 			{
@@ -143,7 +115,7 @@ export default function InvitationsDataTable({ guests }: Props) {
 
 	return (
 		<div>
-			<div className="flex items-center py-4">
+			<div className="flex items-center py-4 justify-between">
 				<Input
 					className="w-1/2"
 					placeholder="Search guests..."
@@ -151,6 +123,15 @@ export default function InvitationsDataTable({ guests }: Props) {
 					onChange={(e) => {
 						setGlobalFilter(e.target.value);
 					}}
+				/>
+
+				<ExportButton
+					filename={`guests-${new Date().toLocaleString()}.csv`}
+					data={guests.map((guest) => ({
+						link: `${typeof window === "object" ? window.location.origin : ""}/${guest.code}`,
+						name: guest.name,
+						rsvp: guest.rsvp === null ? "-" : guest.rsvp ? "yes" : "no",
+					}))}
 				/>
 			</div>
 
@@ -225,6 +206,62 @@ export default function InvitationsDataTable({ guests }: Props) {
 					</Button>
 				</div>
 			</div>
+		</div>
+	);
+}
+
+function ExportButton({
+	filename = "export.csv",
+	data,
+}: {
+	filename: string;
+	data: { rsvp: string; name: string; link: string }[];
+}) {
+	const [isPending, startTransition] = useTransition();
+	const [error, setError] = useState<string | null>(null);
+
+	const handleExport = () => {
+		setError(null);
+
+		startTransition(async () => {
+			const result = await exportCsvAction(data);
+
+			if (result.success && result.csvData) {
+				try {
+					const blob = new Blob([result.csvData], {
+						type: "text/csv;charset=utf-8;",
+					});
+
+					const link = document.createElement("a");
+					const url = URL.createObjectURL(blob);
+					link.setAttribute("href", url);
+					link.setAttribute("download", filename);
+					link.style.visibility = "hidden";
+
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+
+					URL.revokeObjectURL(url);
+				} catch (e) {
+					console.error("Client-side download error:", e);
+					setError("Failed to initiate download.");
+				}
+			} else {
+				console.error("Export action failed:", result.error);
+				setError(result.error || "An unknown error occurred during export.");
+			}
+		});
+	};
+
+	return (
+		<div>
+			<Button type="button" onClick={handleExport} disabled={isPending}>
+				{isPending ? "Exporting..." : "Export to CSV"}
+			</Button>
+			{error && (
+				<p style={{ color: "red", marginTop: "8px" }}>Error: {error}</p>
+			)}
 		</div>
 	);
 }

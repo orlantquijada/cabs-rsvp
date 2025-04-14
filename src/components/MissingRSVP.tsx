@@ -4,19 +4,22 @@ import type * as v from "valibot";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { InvitationSelectSchema } from "~/db/schema";
+import type { InvitationValues } from "~/db/schema";
 
+import { rsvpAction } from "~/lib/actions";
+import type { GetInviationFromCodeValues } from "~/utils/api";
 import arc from "../assets/images/arc view.png";
 import hero from "../assets/images/hero.png";
 import heroText from "../assets/images/hero text.png";
 
 type Props = {
-	invitation: v.InferOutput<typeof InvitationSelectSchema>;
-	rsvpAction: (id: number, code: string, rsvp: boolean) => Promise<void>;
+	guest: NonNullable<GetInviationFromCodeValues>;
 };
 
-export default function MissingRSVP({ invitation, rsvpAction }: Props) {
+export default function MissingRSVP({ guest }: Props) {
 	const router = useRouter();
+	const { invitation } = guest;
+
 	return (
 		<div>
 			<div className="h-screen w-full flex items-center justify-center flex-col px-6 gap-8">
@@ -25,10 +28,10 @@ export default function MissingRSVP({ invitation, rsvpAction }: Props) {
 
 				<p className="text-brand">Hello, {invitation.label} you are invited!</p>
 
-				{invitation.people.length > 1 && (
+				{invitation.invitedPeople.length > 1 && (
 					<ul className="flex flex-col items-center text-brand">
-						{invitation.people.map((person) => (
-							<li key={person}>{person}</li>
+						{invitation.invitedPeople.map((person) => (
+							<li key={person.code}>{person.name}</li>
 						))}
 					</ul>
 				)}
@@ -39,7 +42,7 @@ export default function MissingRSVP({ invitation, rsvpAction }: Props) {
 						type="button"
 						style={{ borderRadius: 8 }}
 						onClick={() => {
-							rsvpAction(invitation.id, invitation.code, true);
+							rsvpAction(guest.code, true);
 							router.refresh();
 						}}
 					>
@@ -50,7 +53,7 @@ export default function MissingRSVP({ invitation, rsvpAction }: Props) {
 						style={{ borderRadius: 8 }}
 						type="button"
 						onClick={() => {
-							rsvpAction(invitation.id, invitation.code, false);
+							rsvpAction(guest.code, false);
 							router.refresh();
 						}}
 					>
