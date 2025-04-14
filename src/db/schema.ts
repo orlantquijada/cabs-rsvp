@@ -1,5 +1,7 @@
+import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import {
+	CreateInsertSchema,
 	createInsertSchema,
 	createSelectSchema,
 	createUpdateSchema,
@@ -18,55 +20,50 @@ function generateRandomCode(length = 5): string {
 
 export const Invitation = sqliteTable("invitations", {
 	id: integer().primaryKey({ autoIncrement: true }).notNull(),
-	people: text().notNull(),
 	label: text().notNull(),
-	rsvp: integer({ mode: "number" }),
+});
+
+export const InvitedPerson = sqliteTable("invited_person", {
+	name: text().notNull(),
+	rsvp: integer({ mode: "boolean" }),
 	code: text("code", { length: 5 })
+		.primaryKey()
 		.notNull()
-		.unique()
 		.$defaultFn(() => generateRandomCode(5)),
-});
 
-const PEOPLE_DELIM = "|";
-
-export const mutatePeopleSchema = v.pipe(
-	v.array(v.string()),
-	v.transform((input) => input.join(PEOPLE_DELIM)),
-);
-const mutateRsvpSchema = v.pipe(
-	v.optional(v.boolean()),
-	v.transform((input) => {
-		if (input === undefined) return null;
-		return input ? 1 : 0;
-	}),
-);
-
-export const CreateInvitationSchema = createInsertSchema(Invitation, {
-	people: mutatePeopleSchema,
-	rsvp: mutateRsvpSchema,
-});
-
-export const UpdateInvitationSchema = createUpdateSchema(Invitation, {
-	people: v.optional(mutatePeopleSchema),
-	rsvp: mutateRsvpSchema,
-});
-
-export const selectPeopleSchema = v.pipe(
-	v.string(),
-	v.transform((input) => input.split("|")),
-);
-
-export const InvitationSelectSchema = createSelectSchema(Invitation, {
-	people: v.pipe(
-		v.string(),
-		v.transform((input) => input.split("|")),
-	),
-	rsvp: v.pipe(
-		v.nullable(v.number()),
-		v.transform((input) => {
-			if (input === null) return null;
-
-			return Boolean(input);
+	invitationId: integer()
+		.notNull()
+		.references(() => Invitation.id, {
+			onDelete: "cascade",
 		}),
-	),
 });
+
+export const invitationRelations = relations(Invitation, ({ many }) => ({
+	invitedPeople: many(InvitedPerson),
+}));
+
+export const invitedPersonRelations = relations(InvitedPerson, ({ one }) => ({
+	invitation: one(Invitation, {
+		fields: [InvitedPerson.invitationId],
+		references: [Invitation.id],
+	}),
+}));
+
+const CreateInvitationSchema = v.object({
+	label: v.string(),
+	people: v.array(v.string()),
+});
+export type CreateInvitationBody = v.InferInput<typeof CreateInvitationSchema>;
+
+const SelectInvitedPersonSchema = createSelectSchema(InvitedPerson);
+export type InvitedPersonValues = v.InferInput<
+	typeof SelectInvitedPersonSchema
+>;
+
+export const UpdateInvitedPersonSchema = createUpdateSchema(InvitedPerson);
+export type UpdateInvitationBody = v.InferInput<
+	typeof UpdateInvitedPersonSchema
+>;
+
+const SelectInvitationSchema = createSelectSchema(Invitation);
+export type InvitationValues = v.InferInput<typeof SelectInvitationSchema>;

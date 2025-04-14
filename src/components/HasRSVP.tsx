@@ -1,17 +1,20 @@
-import Image from "next/image";
-import type * as v from "valibot";
-import type { InvitationSelectSchema } from "~/db/schema";
-
 import { ChevronDown } from "lucide-react";
+import Image from "next/image";
+
+import type { GetInviationFromCodeValues } from "~/utils/api";
+
 import arc from "../assets/images/arc view.png";
 import hero from "../assets/images/hero.png";
 import heroText from "../assets/images/hero text.png";
 import locationView from "../assets/images/location view.png";
+import names from "../assets/images/names.png";
 
 import Flower429 from "../assets/images/flowers/SWIEJKO_flowers_42_9.png";
+import Flower4216 from "../assets/images/flowers/SWIEJKO_flowers_42_16.png";
 import Flower4223 from "../assets/images/flowers/SWIEJKO_flowers_42_23.png";
 import Flower4230 from "../assets/images/flowers/SWIEJKO_flowers_42_30.png";
 import Flower4233 from "../assets/images/flowers/SWIEJKO_flowers_42_33.png";
+import flowerAside from "../assets/images/flowers/flower aside.png";
 
 import women1 from "../assets/images/womens/womens-1.png";
 import women2 from "../assets/images/womens/womens-2.png";
@@ -24,11 +27,11 @@ import men3 from "../assets/images/mens/mens-3.png";
 import men4 from "../assets/images/mens/mens-4.png";
 
 type Props = {
-	invitation: v.InferOutput<typeof InvitationSelectSchema>;
+	guest: GetInviationFromCodeValues;
 };
 
-export default function HasRSVP({ invitation }: Props) {
-	if (invitation.rsvp)
+export default function HasRSVP({ guest }: Props) {
+	if (guest?.rsvp)
 		return (
 			<div>
 				<div className="h-screen w-full flex items-center justify-center flex-col px-6 gap-8">
@@ -38,23 +41,27 @@ export default function HasRSVP({ invitation }: Props) {
 					<hr className="w-full max-w-52 bg-brand text-brand border-brand" />
 
 					<div className="text-brand grid place-items-center">
-						<p className="text-2xl">Thank you for your RSVP!</p>
-						<p className="text-xl">We are so excited you can join us.</p>
+						<p className="text-2xl text-center text-pretty">
+							Thank you for your RSVP!
+						</p>
+						<p className="text-xl text-center text-pretty">
+							We are so excited you can join us.
+						</p>
 					</div>
 
 					<div className="text-brand grid place-items-center">
 						<p className="mb-2">Be noted of the following</p>
-						<ChevronDown size={20} />
+						<a href="#location">
+							<ChevronDown size={20} />
+						</a>
 					</div>
 				</div>
 
 				<Location />
-
 				<Colors />
-
 				<Women />
-
 				<Men />
+				<Gifts />
 
 				<div className="m-4 md:m-8 grid place-items-center">
 					<Image src={arc} alt="hero" />
@@ -85,7 +92,10 @@ export default function HasRSVP({ invitation }: Props) {
 
 function Location() {
 	return (
-		<div className="m-4 flex flex-col md:flex-row relative p-6 gap-16 text-brand-body">
+		<div
+			id="location"
+			className="m-4 flex flex-col md:flex-row relative p-6 gap-16 text-brand-body"
+		>
 			<div className="flex flex-1">
 				<Image
 					src={locationView}
@@ -140,7 +150,7 @@ function Colors() {
 				theme.
 			</p>
 
-			<div className="flex items-center justify-center gap-8 flex-col md:flex-row mt-8 md:mt-12">
+			<div className="flex flex-wrap items-center justify-center gap-8 flex-col md:flex-row mt-8 md:mt-12">
 				<div className="h-20 aspect-square bg-brand-green rounded-full" />
 				<div className="h-20 aspect-square bg-brand-mauve rounded-full" />
 				<div className="h-20 aspect-square bg-brand-pink rounded-full" />
@@ -171,7 +181,7 @@ function Women() {
 				Women&apos;s Dressy casual outfit inspiration
 			</p>
 
-			<div className="flex items-center justify-center gap-8 flex-col md:flex-row mt-8 md:mt-12">
+			<div className="flex flex-wrap items-center justify-center gap-8 flex-col md:flex-row mt-8 md:mt-12">
 				{[women1, women2, women3, women4].map((src, idx) => (
 					<div
 						className="h-50 aspect-square border-2 border-brand-body/75"
@@ -205,7 +215,7 @@ function Men() {
 				Men&apos;s Dressy casual outfit inspiration
 			</p>
 
-			<div className="flex items-center justify-center gap-8 flex-col md:flex-row mt-8 md:mt-12">
+			<div className="flex flex-wrap items-center justify-center gap-8 flex-col md:flex-row mt-8 md:mt-12">
 				{[men1, men2, men3, men4].map((src, idx) => (
 					<div
 						className="h-50 aspect-square border-2 border-brand-body/75"
@@ -227,6 +237,71 @@ function Men() {
 				height={150}
 				className="md:absolute md:left-0 md:bottom-0"
 			/>
+		</div>
+	);
+}
+
+function Gifts() {
+	return (
+		<div className="m-4 md:m-8 grid place-items-center relative bg-brand-bg p-6 md:py-16 gap-8 text-brand-body">
+			<Image
+				src={Flower4216}
+				alt="flower"
+				height={150}
+				className="flex md:hidden"
+			/>
+
+			<p className="uppercase font-header tracking-wide text-4xl text-center max-w-sm font-semibold">
+				Wedding Gifts
+			</p>
+
+			<div className="flex items-center justify-center gap-8 flex-col md:flex-row mt-8 md:mt-12">
+				<Image src={names} alt="names" width={600} />
+			</div>
+
+			<div className="bg-gift text-brand-bg px-4 py-8 relative flex flex-col justify-center">
+				<Image
+					src={flowerAside}
+					alt="flower"
+					height={400}
+					className="hidden md:flex md:absolute md:-translate-x-[200%] md:-top-1/2"
+				/>
+
+				<p className="text-center text-pretty font-header font-light">
+					As we exchange our vows here today,
+				</p>
+				<p className="text-center text-pretty font-header font-light mb-4">
+					Your presence brings us joy and strength to stay.
+				</p>
+
+				<p className="text-center text-pretty font-header font-light">
+					But if you wish to give us more,
+				</p>
+				<p className="text-center text-pretty font-header font-light mb-4">
+					A little help we would adore.
+				</p>
+
+				<p className="text-center text-pretty font-header font-light">
+					To build a home, to start anew,
+				</p>
+				<p className="text-center text-pretty font-header font-light mb-4">
+					Your endowment would be a dream come true.
+				</p>
+
+				<p className="text-center text-pretty font-header font-light">
+					We desire no gifts of grandoise,
+				</p>
+				<p className="text-center text-pretty font-header font-light mb-4">
+					Nor things unused that drift and doze.
+				</p>
+
+				<p className="text-center text-pretty font-header font-light">
+					As we embark on a new life a ONE,
+				</p>
+				<p className="text-center text-pretty font-header font-light mb-4">
+					A cash gift helps our journey begun.
+				</p>
+			</div>
 		</div>
 	);
 }
