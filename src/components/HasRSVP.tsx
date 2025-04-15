@@ -1,8 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 
-import type { GetInviationFromCodeValues } from "~/utils/api";
-
 import arc from "../assets/images/arc view.png";
 import hero from "../assets/images/hero.png";
 import heroText from "../assets/images/hero text.png";
@@ -27,11 +25,11 @@ import men3 from "../assets/images/mens/mens-3.png";
 import men4 from "../assets/images/mens/mens-4.png";
 
 type Props = {
-	guest: GetInviationFromCodeValues;
+	didRsvpYes: boolean;
 };
 
-export default function HasRSVP({ guest }: Props) {
-	if (guest?.rsvp)
+export default function HasRSVP({ didRsvpYes }: Props) {
+	if (didRsvpYes)
 		return (
 			<div>
 				<div className="h-screen w-full flex items-center justify-center flex-col px-6 gap-8">

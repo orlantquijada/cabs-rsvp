@@ -13,7 +13,7 @@ import {
 
 export async function createFullInvitation(
 	input: CreateInvitationBody,
-): Promise<number> {
+): Promise<string> {
 	const { label, people } = input;
 
 	const result = await db.transaction(async (tx) => {
@@ -22,7 +22,7 @@ export async function createFullInvitation(
 			.values({
 				label: label,
 			})
-			.returning({ insertedId: Invitation.id });
+			.returning({ insertedId: Invitation.code });
 
 		if (!newInvitation?.insertedId) {
 			throw new Error("Failed to create invitation record.");
@@ -32,8 +32,8 @@ export async function createFullInvitation(
 
 		if (people.length > 0) {
 			const peopleToInsert = people.map((person) => ({
-				name: person,
-				invitationId: invitationId,
+				...person,
+				invitationCode: invitationId,
 			}));
 
 			await tx.insert(InvitedPerson).values(peopleToInsert);
@@ -46,53 +46,55 @@ export async function createFullInvitation(
 }
 
 export async function getInvitedPeople() {
-	return db.query.InvitedPerson.findMany({ with: { invitation: true } });
+	return db.query.InvitedPerson.findMany({
+		with: { invitation: { with: { invitedPeople: true } } },
+	});
 }
 export type InvitedPeople = Awaited<ReturnType<typeof getInvitedPeople>>;
 
-export async function getInvitedPerson(code: InvitedPersonValues["code"]) {
+export async function getInvitedPerson(id: InvitedPersonValues["id"]) {
 	return db.query.InvitedPerson.findFirst({
-		where: eq(InvitedPerson.code, code),
+		where: eq(InvitedPerson.id, id),
 	});
 }
 
-export async function getInvitationFromCode(code: InvitedPersonValues["code"]) {
-	return db.query.InvitedPerson.findFirst({
-		where: eq(InvitedPerson.code, code),
-		with: {
-			invitation: {
-				with: { invitedPeople: true },
-			},
-		},
-	});
-}
-export type GetInviationFromCodeValues = Awaited<
-	ReturnType<typeof getInvitationFromCode>
->;
-
-export async function getInvitation(id: InvitationValues["id"]) {
+export async function getInvitation(code: InvitationValues["code"]) {
 	return db.query.Invitation.findFirst({
-		where: eq(Invitation.id, id),
+		where: eq(Invitation.code, code),
 		with: {
 			invitedPeople: true,
 		},
 	});
 }
+export type GetInvitationValues = Awaited<ReturnType<typeof getInvitation>>;
 
 export async function patchInvitation(
-	code: InvitedPersonValues["code"],
+	id: InvitedPersonValues["id"],
 	values: UpdateInvitationBody,
 ) {
 	return db
 		.update(InvitedPerson)
 		.set(parse(UpdateInvitedPersonSchema, values))
-		.where(eq(InvitedPerson.code, code));
+		.where(eq(InvitedPerson.id, id));
 }
 
-export async function deleteInvitation(id: InvitationValues["id"]) {
-	return db.delete(Invitation).where(eq(Invitation.id, id));
+export async function bulkRSVP(
+	people: Pick<InvitedPersonValues, "id" | "rsvp">[],
+) {
+	await db.transaction(async (tx) => {
+		for (const person of people) {
+			await tx
+				.update(InvitedPerson)
+				.set({ rsvp: person.rsvp })
+				.where(eq(InvitedPerson.id, person.id));
+		}
+	});
 }
 
-export async function deleteInvitedPerson(code: InvitedPersonValues["code"]) {
-	return db.delete(InvitedPerson).where(eq(InvitedPerson.code, code));
+export async function deleteInvitation(code: InvitationValues["code"]) {
+	return db.delete(Invitation).where(eq(Invitation.code, code));
+}
+
+export async function deleteInvitedPerson(id: InvitedPersonValues["id"]) {
+	return db.delete(InvitedPerson).where(eq(InvitedPerson.id, id));
 }

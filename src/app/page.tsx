@@ -16,6 +16,7 @@ export default async function Home() {
 					guests={guests.map((guest) => ({
 						...guest,
 						invitationLabel: guest.invitation.label,
+						invitedPeople: guest.invitation.invitedPeople,
 					}))}
 				/>
 			</div>

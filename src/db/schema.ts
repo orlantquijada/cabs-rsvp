@@ -1,11 +1,6 @@
 import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import {
-	CreateInsertSchema,
-	createInsertSchema,
-	createSelectSchema,
-	createUpdateSchema,
-} from "drizzle-valibot";
+import { createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 import * as v from "valibot";
 
 function generateRandomCode(length = 5): string {
@@ -19,21 +14,21 @@ function generateRandomCode(length = 5): string {
 }
 
 export const Invitation = sqliteTable("invitations", {
-	id: integer().primaryKey({ autoIncrement: true }).notNull(),
 	label: text().notNull(),
-});
-
-export const InvitedPerson = sqliteTable("invited_person", {
-	name: text().notNull(),
-	rsvp: integer({ mode: "boolean" }),
-	code: text("code", { length: 5 })
+	code: text({ length: 5 })
 		.primaryKey()
 		.notNull()
 		.$defaultFn(() => generateRandomCode(5)),
+});
 
-	invitationId: integer()
+export const InvitedPerson = sqliteTable("invited_person", {
+	id: integer().primaryKey().notNull(),
+	name: text().notNull(),
+	rsvp: integer({ mode: "boolean" }),
+
+	invitationCode: text()
 		.notNull()
-		.references(() => Invitation.id, {
+		.references(() => Invitation.code, {
 			onDelete: "cascade",
 		}),
 });
@@ -44,14 +39,16 @@ export const invitationRelations = relations(Invitation, ({ many }) => ({
 
 export const invitedPersonRelations = relations(InvitedPerson, ({ one }) => ({
 	invitation: one(Invitation, {
-		fields: [InvitedPerson.invitationId],
-		references: [Invitation.id],
+		fields: [InvitedPerson.invitationCode],
+		references: [Invitation.code],
 	}),
 }));
 
 const CreateInvitationSchema = v.object({
 	label: v.string(),
-	people: v.array(v.string()),
+	people: v.array(
+		v.object({ name: v.string(), rsvp: v.optional(v.boolean()) }),
+	),
 });
 export type CreateInvitationBody = v.InferInput<typeof CreateInvitationSchema>;
 

@@ -19,16 +19,22 @@ import {
 } from "~/components/ui/table";
 import Copy from "~/icons/copy";
 import { exportCsvAction } from "~/lib/actions";
+import RSVPColumn from "./CodeColumn";
 import InvitationRowActions from "./InvitationRowActions";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 type Guest = {
 	rsvp: boolean | null;
-	code: string;
 	name: string;
-	invitationId: number;
+	id: number;
+	invitationCode: string;
 	invitationLabel: string;
+	invitedPeople: {
+		rsvp: boolean | null;
+		name: string;
+		id: number;
+	}[];
 };
 
 type Props = {
@@ -52,25 +58,21 @@ export default function InvitationsDataTable({ guests }: Props) {
 				accessorKey: "rsvp",
 				header: "RSVP",
 				accessorFn: ({ rsvp }) => (rsvp === null ? "-" : rsvp ? "yes" : "no"),
-				cell: ({ getValue }) => {
-					const value = getValue();
+				cell: ({ row }) => {
+					const guest = row.original;
 
-					return (
-						<code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] text-xs font-semibold">
-							{value === "-" ? "–" : (value as string)}
-						</code>
-					);
+					return <RSVPColumn guest={{ id: guest.id, rsvp: guest.rsvp }} />;
 				},
 			},
 			{
-				accessorKey: "code",
+				accessorKey: "invitationCode",
 				header: "Code",
 				cell: ({ row }) => {
 					const guest = row.original;
 					return (
 						<span className="inline-flex items-center justify-center gap-1.5">
 							<code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] text-xs font-semibold">
-								{row.original.code}
+								{row.original.invitationCode}
 							</code>
 
 							<Button
@@ -78,7 +80,7 @@ export default function InvitationsDataTable({ guests }: Props) {
 								variant="ghost"
 								className="transition-all active:scale-95"
 								onClick={() => {
-									const url = `${window.location.origin}/${guest.code}`;
+									const url = `${window.location.origin}/${guest.invitationCode}`;
 									if (window.isSecureContext && navigator.clipboard)
 										navigator.clipboard.writeText(url);
 								}}
@@ -128,8 +130,8 @@ export default function InvitationsDataTable({ guests }: Props) {
 				<ExportButton
 					filename={`guests-${new Date().toLocaleString()}.csv`}
 					data={guests.map((guest) => ({
-						link: `${typeof window === "object" ? window.location.origin : ""}/${guest.code}`,
 						name: guest.name,
+						group: guest.invitationLabel,
 						rsvp: guest.rsvp === null ? "-" : guest.rsvp ? "yes" : "no",
 					}))}
 				/>
@@ -215,7 +217,7 @@ function ExportButton({
 	data,
 }: {
 	filename: string;
-	data: { rsvp: string; name: string; link: string }[];
+	data: { rsvp: string; name: string }[];
 }) {
 	const [isPending, startTransition] = useTransition();
 	const [error, setError] = useState<string | null>(null);

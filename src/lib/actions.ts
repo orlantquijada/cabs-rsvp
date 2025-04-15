@@ -9,7 +9,7 @@ import Papa from "papaparse";
 import * as v from "valibot";
 import type { InvitationValues, InvitedPersonValues } from "~/db/schema";
 import {
-	type InvitedPeople,
+	bulkRSVP,
 	createFullInvitation,
 	deleteInvitation,
 	deleteInvitedPerson,
@@ -28,12 +28,15 @@ export async function createInvitationAction(_: unknown, formData: FormData) {
 		const validatedData = await serverValidate(formData);
 		const transformDataSchema = v.object({
 			label: v.string(),
-			guests: v.string(),
+			guests: v.array(v.object({ name: v.string() })),
 		});
-		const parsedData = v.parse(transformDataSchema, validatedData);
+		const parsedData = v.parse(transformDataSchema, {
+			...validatedData,
+			guests: JSON.parse(validatedData.people as unknown as string),
+		});
 		createFullInvitation({
 			label: parsedData.label,
-			people: parsedData.guests.split(","),
+			people: parsedData.guests,
 		});
 		revalidatePath("/");
 	} catch (e) {
@@ -45,25 +48,31 @@ export async function createInvitationAction(_: unknown, formData: FormData) {
 	}
 }
 
-export async function deleteInvitationAction(id: InvitationValues["id"]) {
-	deleteInvitation(id);
+export async function deleteInvitationAction(code: InvitationValues["code"]) {
+	deleteInvitation(code);
 	revalidatePath("/");
 }
 
-export async function deleteInvitedPersonAction(
-	code: InvitedPersonValues["code"],
-) {
-	deleteInvitedPerson(code);
+export async function deleteInvitedPersonAction(id: InvitedPersonValues["id"]) {
+	deleteInvitedPerson(id);
 	revalidatePath("/");
 }
 
-export async function getInvitationAction(id: InvitationValues["id"]) {
-	return getInvitation(id);
+export async function getInvitationAction(code: InvitationValues["code"]) {
+	return getInvitation(code);
 }
 
-export async function rsvpAction(code: string, rsvp: boolean) {
-	patchInvitation(code, { rsvp });
+export async function rsvpAction(id: InvitedPersonValues["id"], rsvp: boolean) {
+	patchInvitation(id, { rsvp });
+	revalidatePath("/");
 	// revalidateTag(initationKeys.code(code));
+}
+
+export async function bulkRsvpAction(
+	people: Pick<InvitedPersonValues, "id" | "rsvp">[],
+) {
+	bulkRSVP(people);
+	revalidatePath("/");
 }
 
 export async function exportCsvAction(data: unknown[]) {

@@ -13,21 +13,10 @@ import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { createInvitationAction } from "~/lib/actions";
 import { formOpts } from "~/lib/create-invitation";
+import { useAppForm } from "~/utils/form";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-
-const { fieldContext, formContext } = createFormHookContexts();
-const { useAppForm } = createFormHook({
-	fieldComponents: {
-		Input,
-	},
-	formComponents: {
-		Button,
-	},
-	fieldContext,
-	formContext,
-});
 
 export default function AddInvitationForm() {
 	const [state, formAction] = useActionState(
@@ -86,9 +75,9 @@ export default function AddInvitationForm() {
 				{(field) => (
 					<div>
 						<input
-							name="guests"
+							name="people"
 							type="hidden"
-							value={field.state.value.map(({ name }) => name)}
+							value={JSON.stringify(field.state.value)}
 						/>
 						<label
 							htmlFor="name"

@@ -1,18 +1,42 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "de07a205-d118-4990-81f3-066ed83360c8",
+  "id": "fe70f92e-2cc1-44bd-b037-32bdcc9a3e43",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "people": {
-      "name": "people",
+    "invitations": {
+      "name": "invitations",
+      "columns": {
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text(5)",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "invited_person": {
+      "name": "invited_person",
       "columns": {
         "id": {
           "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "name": {
           "name": "name",
@@ -28,24 +52,30 @@
           "notNull": false,
           "autoincrement": false
         },
-        "code": {
-          "name": "code",
-          "type": "text(5)",
+        "invitationCode": {
+          "name": "invitationCode",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         }
       },
-      "indexes": {
-        "people_code_unique": {
-          "name": "people_code_unique",
-          "columns": [
+      "indexes": {},
+      "foreignKeys": {
+        "invited_person_invitationCode_invitations_code_fk": {
+          "name": "invited_person_invitationCode_invitations_code_fk",
+          "tableFrom": "invited_person",
+          "tableTo": "invitations",
+          "columnsFrom": [
+            "invitationCode"
+          ],
+          "columnsTo": [
             "code"
           ],
-          "isUnique": true
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
