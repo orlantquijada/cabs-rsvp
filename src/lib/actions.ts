@@ -16,6 +16,8 @@ import {
 	getInvitation,
 	patchInvitation,
 } from "~/utils/api";
+import { attempt } from "~/utils/attempt";
+import { type LoginData, getSession, loginSchema } from "./auth";
 import { formOpts } from "./create-invitation";
 
 const serverValidate = createServerValidate({
@@ -89,4 +91,47 @@ export async function exportCsvAction(data: unknown[]) {
 			error: "Failed to generate CSV data. Please try again.",
 		};
 	}
+}
+
+export async function logout() {
+	const session = await getSession();
+	session.destroy();
+}
+
+export async function login(data: LoginData) {
+	const session = await getSession();
+
+	session.isLoggedIn = data.password === process.env.ADMIN_PASSWORD;
+
+	await session.save();
+	return session.isLoggedIn;
+}
+
+export async function loginFormAction(formData: FormData) {
+	const parseFormAttempt = v.safeParse(
+		loginSchema,
+		Object.fromEntries(formData.entries()),
+	);
+	if (!parseFormAttempt.success) return;
+	// return {
+	// 	success: false,
+	// 	message: "Invalid form data.",
+	// };
+
+	const loginAttempt = await attempt(login(parseFormAttempt.output));
+
+	if (!loginAttempt.success) return;
+	// return {
+	// 	success: false,
+	// 	message: "Something went wrong.",
+	// };
+
+	revalidatePath("/");
+
+	return;
+
+	// return {
+	// 	success: loginAttempt.data,
+	// 	message: loginAttempt.data ? "Login successful." : "Invalid password.",
+	// };
 }
