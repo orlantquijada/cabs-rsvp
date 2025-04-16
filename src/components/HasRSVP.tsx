@@ -115,7 +115,7 @@ function Location() {
 
 				<div className="flex flex-col after:w-8 after:aspect-square after:border-2 after:border-brand relative after:absolute ml-8 after:-left-12 after:-top-0 after:rounded-full before:h-8 before:w-0.5 before:bg-brand before:absolute before:-top-8 before:-left-8">
 					<p className="font-bold mb-2">Reception</p>
-					<p>5:00 PM</p>
+					<p>Reception will follow after the wedding ceremony</p>
 					<p className="text-brand">Santa Maria Ballroom, Radisson Blu Hotel</p>
 					<p className="text-pretty mt-6">
 						Serging Osmena Boulevard, Corner Pope John Paul II Ave, Cebu City,
