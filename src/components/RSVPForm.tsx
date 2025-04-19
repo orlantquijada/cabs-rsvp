@@ -41,7 +41,7 @@ export default function RSVPForm({ invitedPeople }: Props) {
 	});
 
 	return (
-		<div className="text-brand">
+		<div className="text-brand flex flex-col items-center">
 			<form.AppField
 				name="people"
 				mode="array"

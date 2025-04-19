@@ -18,7 +18,16 @@ export default function MissingRSVP({ invitation }: Props) {
 			<div className="min-h-screen w-full flex items-center justify-center flex-col px-6 gap-8">
 				<Image src={hero} alt="hero" className="mt-20" />
 				<Image src={heroText} alt="hero text" />
-				<p className="text-brand">Hello, {invitation.label} you are invited!</p>
+				<div>
+					<p className="text-brand text-center text-pretty mb-4 max-w-sm">
+						Hello, <strong>{invitation.label}</strong> you are cordially invited
+						to our wedding.
+					</p>
+					<p className="text-brand text-center text-pretty max-w-sm">
+						It is with great joy and happiness, we invite you to join us as we
+						unite in love and commitment.
+					</p>
+				</div>
 
 				{/* {invitation.invitedPeople.length > 1 && ( */}
 				{/* 	<ul className="flex flex-col items-center text-brand"> */}

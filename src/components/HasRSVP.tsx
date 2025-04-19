@@ -75,9 +75,15 @@ export default function HasRSVP({ didRsvpYes }: Props) {
 
 				<hr className="w-full max-w-52 bg-brand text-brand border-brand" />
 
-				<div className="text-brand grid place-items-center">
-					<p className="text-2xl">Sorry you can&apos;t make it</p>
-					<p className="text-xl">We will miss you!</p>
+				<div className="text-brand grid place-items-center max-w-sm">
+					<p className="text-base text-center text-pretty">
+						We&apos;re sorry you won&apos;t be able to join us on our special
+						day, but we completely understand.
+					</p>
+					<p className="text-base text-center text-pretty mt-4">
+						Thank you for your well wishes, and we hope to celebrate with you
+						soon in another way!
+					</p>
 				</div>
 			</div>
 
@@ -109,13 +115,13 @@ function Location() {
 					<p className="text-brand">Chapel of Pedro Calungsod</p>
 
 					<p className="text-pretty mt-6">
-						SM Seaside Complex, Church Ave., Cebu City
+						SM Seaside Complex, Church Ave., Cebu City, 6000 Cebu
 					</p>
 				</div>
 
 				<div className="flex flex-col after:w-8 after:aspect-square after:border-2 after:border-brand relative after:absolute ml-8 after:-left-12 after:-top-0 after:rounded-full before:h-8 before:w-0.5 before:bg-brand before:absolute before:-top-8 before:-left-8">
 					<p className="font-bold mb-2">Reception</p>
-					<p>Reception will follow after the wedding ceremony</p>
+					<p>To follow after the wedding ceremony</p>
 					<p className="text-brand">Santa Maria Ballroom, Radisson Blu Hotel</p>
 					<p className="text-pretty mt-6">
 						Serging Osmena Boulevard, Corner Pope John Paul II Ave, Cebu City,
@@ -226,7 +232,7 @@ function Men() {
 			</div>
 
 			<p className="text-center text-pretty font-header font-light text-brand-body/75">
-				A dress shirt / polog with slacks is perfect
+				A dress shirt / polo with slacks is perfect
 			</p>
 
 			<Image
